@@ -73,7 +73,7 @@ export function Header() {
               to="/supplier"
               className="opacity-80 transition-opacity hover:opacity-100"
             >
-              Yetkazib Beruvchilar
+              Suppliers
             </Link>
           </nav>
           {user ? (
