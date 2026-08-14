@@ -30,6 +30,7 @@ const sections = ["Cusines", "Diet", "Bakery"] as const;
 function Home() {
   const { filters, toggle, clear } = useFilters();
   const visible = filterRecipes(filters, "");
+  const filtersOn = Object.values(filters).flat().length > 0;
 
   return (
     <div>
@@ -117,40 +118,79 @@ function Home() {
             <Link
               to="/supplier"
               activeProps={{ className: "text-primary underline" }}
-              className="rounded-full bg-primary/10 px-3 py-0.5 text-primary font-extrabold transition-colors hover:bg-primary hover:text-primary-foreground"
+              className="text-primary/80 transition-colors hover:text-primary"
             >
-              🚚 Supplier Portal
+              Supplier Portal
             </Link>
           </nav>
 
-          {sections.map((section) => {
-            const items = visible.filter((r) => r.section === section);
-            return (
-              <section key={section} id={section.toLowerCase()} className="mt-10 scroll-mt-28">
-                <div className="flex items-center justify-between">
-                  <h2 className="script-title text-4xl">{section}</h2>
-                  <Link
-                    to="/explore"
-                    search={{ section }}
-                    className="text-xs font-bold text-primary hover:underline"
-                  >
-                    Barchasini ko'rish &rarr;
-                  </Link>
-                </div>
-                {items.length === 0 ? (
-                  <p className="mt-4 text-sm text-muted-foreground">
-                    Bu filtrlar bo'yicha {section} bo'limida mahsulot topilmadi.
+          {/* Filter aktiv bo'lganda — barcha natijalar bir grid da */}
+          {filtersOn ? (
+            <section className="mt-10">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="script-title text-4xl">
+                  Natijalar
+                  <span className="ml-3 text-base font-normal text-muted-foreground">
+                    ({visible.length} ta)
+                  </span>
+                </h2>
+                <button
+                  onClick={clear}
+                  className="text-xs font-bold text-primary hover:underline"
+                >
+                  Filtrlarni tozalash ✕
+                </button>
+              </div>
+              {visible.length === 0 ? (
+                <div className="mt-6 rounded-xl border border-dashed border-border p-12 text-center">
+                  <p className="text-lg font-semibold text-muted-foreground">
+                    Hech narsa topilmadi
                   </p>
-                ) : (
-                  <div className="scroll-shelf mt-4 flex gap-5 overflow-x-auto pb-4 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
-                    {items.map((r) => (
-                      <RecipeCard key={r.id} recipe={r} />
-                    ))}
-                  </div>
-                )}
-              </section>
-            );
-          })}
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Boshqa filtr kombinatsiyasini sinab ko'ring.
+                  </p>
+                  <button
+                    onClick={clear}
+                    className="mt-4 rounded-md bg-primary px-5 py-2 text-sm font-bold text-primary-foreground"
+                  >
+                    Filtrlarni tozalash
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {visible.map((r) => (
+                    <RecipeCard key={r.id} recipe={r} />
+                  ))}
+                </div>
+              )}
+            </section>
+          ) : (
+            /* Filter yo'q — eski section ko'rinishi */
+            <>
+              {sections.map((section) => {
+                const items = visible.filter((r) => r.section === section);
+                return (
+                  <section key={section} id={section.toLowerCase()} className="mt-10 scroll-mt-28">
+                    <div className="flex items-center justify-between">
+                      <h2 className="script-title text-4xl">{section}</h2>
+                      <Link
+                        to="/explore"
+                        search={{ section }}
+                        className="text-xs font-bold text-primary hover:underline"
+                      >
+                        Barchasini ko'rish &rarr;
+                      </Link>
+                    </div>
+                    <div className="scroll-shelf mt-4 flex gap-5 overflow-x-auto pb-4 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
+                      {items.map((r) => (
+                        <RecipeCard key={r.id} recipe={r} />
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+            </>
+          )}
 
           <p className="mt-10 text-sm text-muted-foreground">
             {visible.length} / {recipes.length} recipes shown.

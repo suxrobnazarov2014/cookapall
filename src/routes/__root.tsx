@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { StoreProvider } from "../lib/store";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
+import { ThemeProvider } from "../lib/theme";
 
 function NotFoundComponent() {
   return (
@@ -130,21 +131,20 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isSupplierPage = pathname === "/supplier" || pathname.startsWith("/supplier/");
-
   return (
     <QueryClientProvider client={queryClient}>
-      <StoreProvider>
-        <div className="flex min-h-screen flex-col">
-          {!isSupplierPage && <Header />}
-          <main className="flex-1">
-            {/* Required: nested routes render here. */}
-            <Outlet />
-          </main>
-          {!isSupplierPage && <Footer />}
-        </div>
-      </StoreProvider>
+      <ThemeProvider>
+        <StoreProvider>
+          <div className="flex min-h-screen flex-col bg-background text-foreground transition-colors duration-200">
+            <Header />
+            <main className="flex-1">
+              {/* Required: nested routes render here. */}
+              <Outlet />
+            </main>
+            <Footer />
+          </div>
+        </StoreProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

@@ -7,7 +7,6 @@ import {
   MapPin,
   Phone,
   CreditCard,
-  DollarSign,
   Package,
   ArrowLeft,
   ChevronDown,
@@ -16,15 +15,22 @@ import {
   Eye,
   EyeOff,
   LogOut,
+  User,
+  TrendingUp,
+  ShieldCheck,
+  Sparkles,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useTheme } from "@/lib/theme";
 
 export const Route = createFileRoute("/supplier")({
   head: () => ({
     meta: [
-      { title: "Yetkazib Beruvchilar Paneli — Cookpal" },
+      { title: "Supplier Dashboard — Cookpal" },
       {
         name: "description",
-        content: "Mijozlardan tushgan buyurtmalar, manzil va yetkazib berish nazorati.",
+        content: "Secure courier panel for managing deliveries and orders in Cookpal.",
       },
     ],
   }),
@@ -48,13 +54,11 @@ export type SupplierOrder = {
   createdAt: string;
 };
 
-// Fixed supplier credentials — only courier can enter
 const SUPPLIER_USERNAME = "courier";
 const SUPPLIER_PASSWORD = "pass123";
 const SUPPLIER_AUTH_KEY = "cookpal.supplier_auth";
 const STORAGE_KEY = "cookpal.supplier_orders";
 
-// Default seed orders shown initially
 const defaultSeedOrders: SupplierOrder[] = [
   {
     id: "ORD-101",
@@ -68,7 +72,7 @@ const defaultSeedOrders: SupplierOrder[] = [
     quantity: 2,
     unitPrice: 140,
     totalPrice: 280,
-    paymentMethod: "Karta (HUMO)",
+    paymentMethod: "Card (HUMO)",
     cardNumber: "9860 **** **** 4120",
     status: "Kutilmoqda ⏳",
     createdAt: "Bugun, 14:30",
@@ -85,7 +89,7 @@ const defaultSeedOrders: SupplierOrder[] = [
     quantity: 1,
     unitPrice: 135,
     totalPrice: 135,
-    paymentMethod: "Naqd pul",
+    paymentMethod: "Cash",
     status: "Kutilmoqda ⏳",
     createdAt: "Bugun, 15:10",
   },
@@ -101,15 +105,18 @@ const defaultSeedOrders: SupplierOrder[] = [
     quantity: 3,
     unitPrice: 160,
     totalPrice: 480,
-    paymentMethod: "Karta (UZCARD)",
+    paymentMethod: "Card (UZCARD)",
     cardNumber: "8600 **** **** 9012",
     status: "Yetkazib berildi ✅",
     createdAt: "Bugun, 12:20",
   },
 ];
 
-// ─── Login Gate Component ────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
+// COOKPAL STYLE LOGIN COMPONENT
+// ─────────────────────────────────────────────────────────────────────
 function SupplierLogin({ onLogin }: { onLogin: () => void }) {
+  const { theme, toggleTheme } = useTheme();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -120,7 +127,6 @@ function SupplierLogin({ onLogin }: { onLogin: () => void }) {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
     setTimeout(() => {
       if (
         username.trim().toLowerCase() === SUPPLIER_USERNAME &&
@@ -129,132 +135,192 @@ function SupplierLogin({ onLogin }: { onLogin: () => void }) {
         localStorage.setItem(SUPPLIER_AUTH_KEY, "true");
         onLogin();
       } else {
-        setError("Login yoki parol noto'g'ri. Faqat ruxsat berilgan kuryerlar kirishi mumkin.");
+        setError("Login yoki parol noto'g'ri. Faqat vakolatli kuryerlar kiritiladi.");
       }
       setLoading(false);
-    }, 700);
+    }, 600);
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        {/* Logo / Brand */}
-        <div className="flex flex-col items-center mb-8 text-center">
-          <div className="flex size-16 items-center justify-center rounded-2xl bg-primary shadow-2xl mb-4">
-            <Truck className="size-9 text-primary-foreground" />
-          </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">
-            Yetkazib Beruvchilar Paneli
-          </h1>
-          <p className="mt-2 text-sm text-slate-400">
-            Bu sahifa faqat ruxsatli kuryerlar va ta'minotchilar uchun.
-          </p>
-        </div>
+    <div className="min-h-[75vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-muted/20">
+      <div className="w-full max-w-md space-y-6">
+        {/* Main Card */}
+        <div className="bg-card border border-border shadow-lg rounded-3xl p-8 sm:p-10 space-y-6 relative overflow-hidden">
+          {/* Decorative subtle green corner gradient */}
+          <div className="absolute -top-16 -right-16 w-32 h-32 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
 
-        {/* Login Card */}
-        <div className="rounded-3xl border border-slate-800 bg-slate-900 p-8 shadow-2xl">
-          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-primary mb-6">
-            <Lock className="size-4" /> Tizimga kirish
+          {/* Theme toggle button top right */}
+          <div className="absolute top-4 right-4 z-10">
+            <button
+              onClick={toggleTheme}
+              className="inline-flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer px-2 py-1"
+              title={theme === "dark" ? "Light Mode-ga o'tish" : "Dark Mode-ga o'tish"}
+            >
+              {theme === "dark" ? (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-sky-500" />
+                  <span>Dark Mode</span>
+                </>
+              )}
+            </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Username */}
+          {/* Header Badge & Title */}
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20 mx-auto">
+              <Truck className="w-8 h-8" />
+            </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">
+                Supplier Portal
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1 font-medium">
+                Cookpal Kuryerlar va Ta'minotchilar Tizimi
+              </p>
+            </div>
+          </div>
+
+          {/* Security Banner */}
+          <div className="flex items-center gap-2.5 bg-primary/5 border border-primary/20 rounded-2xl px-4 py-2.5 text-xs text-primary font-semibold">
+            <ShieldCheck className="w-4 h-4 shrink-0" />
+            <span>Xavfsiz ulanish · Cookpal Logistics</span>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-foreground uppercase tracking-wider mb-2">
                 Foydalanuvchi nomi
               </label>
-              <input
-                type="text"
-                required
-                autoComplete="username"
-                placeholder="courier"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 text-base font-bold text-white outline-none placeholder:text-slate-600 transition focus:border-primary focus:ring-2 focus:ring-primary/25"
-              />
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  required
+                  placeholder="courier"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full h-11 pl-10 pr-4 bg-background border border-input rounded-xl text-foreground text-sm font-semibold placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                />
+              </div>
             </div>
 
-            {/* Password */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
+              <label className="block text-xs font-bold text-foreground uppercase tracking-wider mb-2">
                 Parol
               </label>
               <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
-                  autoComplete="current-password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 pr-12 text-base font-bold text-white outline-none placeholder:text-slate-600 transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+                  className="w-full h-11 pl-10 pr-11 bg-background border border-input rounded-xl text-foreground text-sm font-semibold placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 transition-colors"
                   tabIndex={-1}
                 >
-                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {/* Error */}
             {error && (
-              <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-3 text-xs font-bold text-red-400">
-                {error}
+              <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-3 text-xs font-semibold text-destructive flex items-center gap-2">
+                <span>⚠️</span>
+                <span>{error}</span>
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
+              className="w-full h-12 bg-primary text-primary-foreground font-bold text-sm rounded-xl shadow-md hover:bg-primary/90 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {loading ? (
-                <span className="size-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
+                <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
               ) : (
-                <Lock className="size-5" />
+                <Truck className="w-4 h-4" />
               )}
-              {loading ? "Tekshirilmoqda..." : "Kirish"}
+              <span>{loading ? "Tekshirilmoqda..." : "Tizimga kirish"}</span>
             </button>
           </form>
 
-          {/* Back to main site */}
-          <div className="mt-6 text-center">
+
+
+          <div className="text-center pt-2">
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-300 transition"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
             >
-              <ArrowLeft className="size-3.5" /> Asosiy saytga qaytish
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Bosh sahifaga qaytish
             </Link>
           </div>
         </div>
-
-        {/* Security note */}
-        <p className="mt-5 text-center text-[11px] text-slate-600">
-          Ruxsatsiz kirish urinishlari qayd etiladi va tekshiriladi.
-        </p>
       </div>
     </div>
   );
 }
 
-// ─── Main Supplier Portal Component ─────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
+// COOKPAL STYLE STAT CARD
+// ─────────────────────────────────────────────────────────────────────
+function StatCard({
+  icon,
+  label,
+  value,
+  badgeText,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  badgeText?: string;
+}) {
+  return (
+    <div className="bg-card border border-border/80 shadow-sm rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+          {icon}
+          {label}
+        </span>
+        {badgeText && (
+          <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary/20">
+            {badgeText}
+          </span>
+        )}
+      </div>
+      <div className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+        {value}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// MAIN PORTAL
+// ─────────────────────────────────────────────────────────────────────
 export function SupplierPortal() {
+  const { theme, toggleTheme } = useTheme();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [orders, setOrders] = useState<SupplierOrder[]>([]);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
-  // Check auth on mount
   useEffect(() => {
     const auth = localStorage.getItem(SUPPLIER_AUTH_KEY);
     setIsAuthenticated(auth === "true");
   }, []);
 
-  // Load orders from localStorage
   function loadOrders() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -282,12 +348,12 @@ export function SupplierPortal() {
     }
   }, [isAuthenticated]);
 
-  function saveOrders(nextOrders: SupplierOrder[]) {
-    setOrders(nextOrders);
+  function saveOrders(next: SupplierOrder[]) {
+    setOrders(next);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextOrders));
-    } catch (e) {
-      console.error(e);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      /* noop */
     }
   }
 
@@ -296,242 +362,352 @@ export function SupplierPortal() {
     setIsAuthenticated(false);
   }
 
-  function handleMarkAsDelivered(orderId: string, e: React.MouseEvent) {
+  function handleMarkDelivered(orderId: string, e: React.MouseEvent) {
     e.stopPropagation();
-    const updated = orders.map((o) =>
-      o.id === orderId ? { ...o, status: "Yetkazib berildi ✅" as const } : o
+    saveOrders(
+      orders.map((o) =>
+        o.id === orderId ? { ...o, status: "Yetkazib berildi ✅" as const } : o
+      )
     );
-    saveOrders(updated);
   }
 
-  // Loading state
   if (isAuthenticated === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950">
-        <span className="size-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
 
-  // Not authenticated → show login
   if (!isAuthenticated) {
     return <SupplierLogin onLogin={() => setIsAuthenticated(true)} />;
   }
 
-  // Compute statistics from real orders
   const totalOrders = orders.length;
-  const deliveredOrders = orders.filter((o) => o.status === "Yetkazib berildi ✅");
-  const deliveredCount = deliveredOrders.length;
-  const remainingCount = totalOrders - deliveredCount;
-  const totalRevenue = deliveredOrders.reduce((sum, o) => sum + o.totalPrice, 0);
+  const delivered = orders.filter((o) => o.status === "Yetkazib berildi ✅");
+  const deliveredCount = delivered.length;
+  const remaining = totalOrders - deliveredCount;
+  const revenue = delivered.reduce((s, o) => s + o.totalPrice, 0);
+
+  const pending = orders.filter((o) => o.status !== "Yetkazib berildi ✅");
+  const done = orders.filter((o) => o.status === "Yetkazib berildi ✅");
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 pb-20">
-      {/* Supplier Navbar */}
-      <header className="border-b border-slate-800 bg-slate-950/90 sticky top-0 z-30 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-black shadow-lg">
-              <Truck className="size-6" />
-            </span>
+    <div className="min-h-screen bg-muted/20 pb-16">
+      {/* Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        {/* ── Top Cookpal Header Banner ── */}
+        <div className="bg-card border border-border/80 shadow-sm rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-md shrink-0">
+              <Truck className="w-7 h-7" />
+            </div>
             <div>
-              <h1 className="text-lg font-extrabold tracking-tight">Yetkazib Beruvchilar Paneli</h1>
-              <p className="text-xs text-slate-400">Kuryer: courier</p>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                  Supplier Dashboard
+                </h1>
+                <span className="bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full text-xs font-extrabold">
+                  Cookpal Courier
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-1 font-medium">
+                Real-vaqt rejimida buyurtmalarni kuzatish va yetkazib berish holatini boshqarish
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full md:w-auto relative z-10">
+            <button
+              onClick={toggleTheme}
+              className="inline-flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer px-2 py-1"
+              title={theme === "dark" ? "Light Mode-ga o'tish" : "Dark Mode-ga o'tish"}
+            >
+              {theme === "dark" ? (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-sky-500" />
+                  <span>Dark Mode</span>
+                </>
+              )}
+            </button>
             <Link
               to="/"
-              className="flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-2 text-xs font-bold text-slate-300 hover:bg-slate-800 transition"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-input bg-background hover:bg-muted text-foreground text-xs font-bold transition-all"
             >
-              <ArrowLeft className="size-4" /> Asosiy sayt
+              <ArrowLeft className="w-3.5 h-3.5" /> Bosh sahifa
             </Link>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 rounded-xl border border-red-700/50 px-4 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 transition"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-destructive/20 bg-destructive/5 hover:bg-destructive/10 text-destructive text-xs font-bold transition-all"
             >
-              <LogOut className="size-4" /> Chiqish
+              <LogOut className="w-3.5 h-3.5" /> Chiqish
             </button>
           </div>
         </div>
-      </header>
 
-      {/* Main */}
-      <main className="mx-auto max-w-6xl px-6 py-8 space-y-8">
-        {/* Statistics */}
-        <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-lg">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-              <Package className="size-4 text-blue-400" /> Jami Buyurtmalar
-            </div>
-            <p className="mt-2 text-3xl font-black text-white">{totalOrders} ta</p>
-          </div>
+        {/* ── Stats Grid ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            icon={<Package className="w-4 h-4 text-primary" />}
+            label="Jami Buyurtmalar"
+            value={`${totalOrders}`}
+            badgeText="Barchasi"
+          />
+          <StatCard
+            icon={<CheckCircle className="w-4 h-4 text-emerald-600" />}
+            label="Yetkazib Berildi"
+            value={`${deliveredCount}`}
+            badgeText="Muvaffaqiyatli"
+          />
+          <StatCard
+            icon={<Clock className="w-4 h-4 text-amber-600" />}
+            label="Kutilmoqda"
+            value={`${remaining}`}
+            badgeText="Jarayonda"
+          />
+          <StatCard
+            icon={<TrendingUp className="w-4 h-4 text-primary" />}
+            label="Jami Tushum"
+            value={`$${revenue}`}
+            badgeText="Tushum"
+          />
+        </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-lg">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-              <CheckCircle className="size-4 text-emerald-400" /> Yetkazib Berildi
-            </div>
-            <p className="mt-2 text-3xl font-black text-emerald-400">{deliveredCount} ta</p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-lg">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-              <Clock className="size-4 text-amber-400" /> Qolgan
-            </div>
-            <p className="mt-2 text-3xl font-black text-amber-400">{remainingCount} ta</p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-lg">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-              <DollarSign className="size-4 text-primary" /> Jami Daromad
-            </div>
-            <p className="mt-2 text-3xl font-black text-primary">$ {totalRevenue}</p>
-          </div>
-        </section>
-
-        {/* Orders List */}
+        {/* ── Pending Deliveries ── */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h2 className="text-xl font-extrabold">Tushgan Buyurtmalar</h2>
-            <span className="text-xs text-slate-400">
-              Kartani bosib manzilni ko'ring
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-extrabold text-foreground flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+              Kutilayotgan yetkazib berishlar
+              <span className="bg-amber-100 text-amber-800 border border-amber-200 text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                {pending.length} ta
+              </span>
+            </h2>
+            <span className="text-xs font-medium text-muted-foreground hidden sm:inline">
+              Manzil va ma'lumotlarni ko'rish uchun kartochkani bosing
             </span>
           </div>
 
-          {orders.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-800 p-12 text-center text-slate-500">
-              Hali buyurtmalar kelmadi. Asosiy saytdan buyurtma berilganda bu yerda ko'rinadi.
+          {pending.length === 0 ? (
+            <div className="bg-card border border-dashed border-border rounded-3xl p-10 text-center space-y-2">
+              <Sparkles className="w-8 h-8 text-primary mx-auto opacity-80" />
+              <p className="text-foreground font-bold text-base">
+                Barcha kutilayotgan buyurtmalar yetkazib berildi!
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Yangi buyurtmalar kelib tushganda avtomatik shu yerda ko'rinadi.
+              </p>
             </div>
           ) : (
-            orders.map((order) => {
-              const isExpanded = expandedOrderId === order.id;
-              const isDelivered = order.status === "Yetkazib berildi ✅";
-
-              return (
-                <div
+            <div className="space-y-3">
+              {pending.map((order) => (
+                <OrderCard
                   key={order.id}
-                  onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
-                  className={`cursor-pointer rounded-2xl border overflow-hidden transition-all duration-200 ${
-                    isDelivered
-                      ? "border-slate-800/60 bg-slate-950/40 opacity-80"
-                      : "border-slate-700 bg-slate-950/90 shadow-md hover:border-primary"
-                  }`}
-                >
-                  {/* Card Header */}
-                  <div className="p-5 flex flex-wrap items-center gap-4 sm:flex-nowrap">
-                    <img
-                      src={order.recipeImage}
-                      alt={order.recipeTitle}
-                      className="size-16 rounded-xl object-cover shrink-0 border border-slate-800"
-                    />
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
-                        <span>{order.id}</span>
-                        <span>•</span>
-                        <span>{order.createdAt}</span>
-                      </div>
-                      <h3 className="font-extrabold text-base text-white truncate mt-0.5">
-                        {order.recipeTitle}
-                      </h3>
-                      <p className="text-xs font-bold text-slate-400">
-                        Miqdor:{" "}
-                        <span className="text-primary font-black text-sm">{order.quantity} ta</span>{" "}
-                        ($ {order.unitPrice} / dona)
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col items-end gap-1.5 shrink-0 ml-auto">
-                      <span className="text-xl font-black text-primary">$ {order.totalPrice}</span>
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-extrabold border ${
-                          isDelivered
-                            ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                            : "bg-amber-500/15 text-amber-400 border-amber-500/30 animate-pulse"
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
-
-                    <div className="text-slate-500 pl-1">
-                      {isExpanded ? <ChevronUp className="size-5" /> : <ChevronDown className="size-5" />}
-                    </div>
-                  </div>
-
-                  {/* Expanded Detail */}
-                  {isExpanded && (
-                    <div className="border-t border-slate-800 bg-slate-900/60 p-5 space-y-4">
-                      <div className="grid gap-4 sm:grid-cols-3">
-                        <div className="space-y-1.5 rounded-xl bg-slate-950/80 p-4 border border-slate-800">
-                          <span className="flex items-center gap-1.5 text-xs font-extrabold uppercase text-primary">
-                            <MapPin className="size-4" /> Yetkazib berish manzili
-                          </span>
-                          <p className="text-sm font-bold text-white">{order.address}</p>
-                        </div>
-
-                        <div className="space-y-1.5 rounded-xl bg-slate-950/80 p-4 border border-slate-800">
-                          <span className="flex items-center gap-1.5 text-xs font-extrabold uppercase text-primary">
-                            <Phone className="size-4" /> Buyurtmachi
-                          </span>
-                          <p className="text-sm font-bold text-white">{order.customerName}</p>
-                          <p className="text-xs font-mono text-slate-400">{order.phone}</p>
-                        </div>
-
-                        <div className="space-y-1.5 rounded-xl bg-slate-950/80 p-4 border border-slate-800">
-                          <span className="flex items-center gap-1.5 text-xs font-extrabold uppercase text-primary">
-                            <CreditCard className="size-4" /> To'lov
-                          </span>
-                          <p className="text-sm font-bold text-white">{order.paymentMethod}</p>
-                          {order.cardNumber && (
-                            <p className="text-xs font-mono text-slate-400">{order.cardNumber}</p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Delivered Button */}
-                      {!isDelivered ? (
-                        <div className="flex justify-end pt-1">
-                          <button
-                            type="button"
-                            onClick={(e) => handleMarkAsDelivered(order.id, e)}
-                            className="flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-extrabold text-white shadow-lg transition-all hover:bg-emerald-500 hover:scale-105 active:scale-95"
-                          >
-                            <CheckCircle className="size-5" />
-                            Yetkazib berildi — $ {order.totalPrice} daromadga qo'shilsin
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-end gap-1.5 text-xs font-bold text-emerald-400">
-                          <CheckCircle className="size-4" />
-                          Yetkazib berilgan — $ {order.totalPrice} daromadga o'tgan.
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Bottom quick action bar (collapsed & not delivered) */}
-                  {!isExpanded && !isDelivered && (
-                    <div className="border-t border-slate-800 bg-slate-900/40 px-5 py-3 flex items-center justify-between">
-                      <span className="text-xs text-slate-500 font-bold">
-                        📍 Manzilni ko'rish uchun kartani bosing
-                      </span>
-                      <button
-                        type="button"
-                        onClick={(e) => handleMarkAsDelivered(order.id, e)}
-                        className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-extrabold text-white shadow transition-all hover:bg-emerald-500 active:scale-95"
-                      >
-                        <CheckCircle className="size-4" /> Yetkazib berildi ($ {order.totalPrice})
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })
+                  order={order}
+                  expanded={expandedOrderId === order.id}
+                  onToggle={() =>
+                    setExpandedOrderId(expandedOrderId === order.id ? null : order.id)
+                  }
+                  onDeliver={(e) => handleMarkDelivered(order.id, e)}
+                />
+              ))}
+            </div>
           )}
         </section>
-      </main>
+
+        {/* ── Delivered Deliveries ── */}
+        {done.length > 0 && (
+          <section className="space-y-4 pt-4">
+            <h2 className="text-lg font-extrabold text-muted-foreground flex items-center gap-2.5">
+              <CheckCircle className="w-5 h-5 text-emerald-600" />
+              Bajarilgan yetkazib berishlar
+              <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                {done.length} ta
+              </span>
+            </h2>
+            <div className="space-y-3">
+              {done.map((order) => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  expanded={expandedOrderId === order.id}
+                  onToggle={() =>
+                    setExpandedOrderId(expandedOrderId === order.id ? null : order.id)
+                  }
+                  onDeliver={(e) => handleMarkDelivered(order.id, e)}
+                  dimmed
+                />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// COOKPAL STYLE ORDER CARD
+// ─────────────────────────────────────────────────────────────────────
+function OrderCard({
+  order,
+  expanded,
+  onToggle,
+  onDeliver,
+  dimmed = false,
+}: {
+  order: SupplierOrder;
+  expanded: boolean;
+  onToggle: () => void;
+  onDeliver: (e: React.MouseEvent) => void;
+  dimmed?: boolean;
+}) {
+  const isDelivered = order.status === "Yetkazib berildi ✅";
+
+  return (
+    <div
+      onClick={onToggle}
+      className={`bg-card border rounded-2xl transition-all duration-200 cursor-pointer overflow-hidden shadow-sm hover:shadow-md ${
+        expanded ? "border-primary ring-2 ring-primary/10" : "border-border/80 hover:border-primary/40"
+      } ${dimmed ? "opacity-75 bg-muted/20" : ""}`}
+    >
+      {/* Header Row */}
+      <div className="p-4 sm:p-5 flex items-center gap-4 flex-wrap sm:flex-nowrap">
+        {/* Image */}
+        <img
+          src={order.recipeImage}
+          alt={order.recipeTitle}
+          className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover border border-border shrink-0 shadow-xs"
+        />
+
+        {/* Main Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold mb-1">
+            <span className="font-mono bg-muted px-1.5 py-0.5 rounded text-[11px] text-foreground">
+              {order.id}
+            </span>
+            <span>·</span>
+            <span>{order.createdAt}</span>
+          </div>
+          <h3 className="font-bold text-base text-foreground truncate">
+            {order.recipeTitle}
+          </h3>
+          <p className="text-xs text-muted-foreground font-medium mt-0.5">
+            Soni: <span className="font-bold text-primary">{order.quantity} ta</span> · ${order.unitPrice}/dona
+          </p>
+        </div>
+
+        {/* Right Info: Price & Status */}
+        <div className="flex items-center gap-4 shrink-0 ml-auto">
+          <div className="text-right">
+            <div className="text-lg sm:text-xl font-black text-primary">
+              ${order.totalPrice}
+            </div>
+            <span
+              className={`inline-block text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border mt-0.5 ${
+                isDelivered
+                  ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                  : "bg-amber-100 text-amber-800 border-amber-200 animate-pulse"
+              }`}
+            >
+              {isDelivered ? "Yetkazib berildi" : "Kutilmoqda"}
+            </span>
+          </div>
+
+          <div className="text-muted-foreground p-1">
+            {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          </div>
+        </div>
+      </div>
+
+      {/* Collapsed Quick Action Bar for Pending */}
+      {!expanded && !isDelivered && (
+        <div className="bg-muted/40 border-t border-border px-5 py-2.5 flex items-center justify-between gap-4">
+          <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-primary" /> Manzilni ko'rish uchun kartochkani bosing
+          </span>
+          <button
+            type="button"
+            onClick={onDeliver}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all"
+          >
+            <CheckCircle className="w-3.5 h-3.5" />
+            Topshirildi (+$${order.totalPrice})
+          </button>
+        </div>
+      )}
+
+      {/* Expanded Panel */}
+      {expanded && (
+        <div className="border-t border-border bg-muted/30 p-5 space-y-4 animate-in fade-in duration-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Delivery Address */}
+            <div className="bg-card border border-primary/20 rounded-xl p-4 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider">
+                <MapPin className="w-4 h-4" /> Yetkazib berish manzili
+              </div>
+              <p className="text-sm font-bold text-foreground leading-relaxed">
+                {order.address}
+              </p>
+            </div>
+
+            {/* Customer Details */}
+            <div className="bg-card border border-amber-200 rounded-xl p-4 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 uppercase tracking-wider">
+                <Phone className="w-4 h-4" /> Mijoz Ma'lumotlari
+              </div>
+              <p className="text-sm font-bold text-foreground">
+                {order.customerName}
+              </p>
+              <p className="text-xs font-mono font-semibold text-muted-foreground">
+                {order.phone}
+              </p>
+            </div>
+
+            {/* Payment Details */}
+            <div className="bg-card border border-border rounded-xl p-4 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                <CreditCard className="w-4 h-4 text-primary" /> To'lov Usuli
+              </div>
+              <p className="text-sm font-bold text-foreground">
+                {order.paymentMethod}
+              </p>
+              {order.cardNumber && (
+                <p className="text-xs font-mono font-semibold text-muted-foreground">
+                  {order.cardNumber}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Action Button inside Expanded panel */}
+          {!isDelivered ? (
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={onDeliver}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-sm font-extrabold shadow-md transition-all"
+              >
+                <CheckCircle className="w-5 h-5" />
+                Yetkazib berildi deb belgilash (+$${order.totalPrice})
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-end gap-2 text-emerald-600 font-extrabold text-xs pt-1">
+              <CheckCircle className="w-4 h-4" />
+              Ushbu buyurtma muvaffaqiyatli yetkazib berilgan
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

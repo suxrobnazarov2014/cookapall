@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { RecipeCard } from "@/components/RecipeCard";
+import { recipes } from "@/lib/recipes";
 
 type AuthSearch = { mode: "login" | "register" };
 
@@ -47,67 +49,92 @@ function AuthPage() {
     navigate({ to: "/profile" });
   }
 
+  const featuredRecipes = recipes.filter((r) => r.rating === 5).slice(0, 3);
+
   return (
-    <div className="mx-auto max-w-md px-6 py-16">
-      <h1 className="script-title text-5xl">{isRegister ? "Register" : "Login"}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Ma'lumotlar shu brauzerda saqlanadi, keyingi kirishda profilingiz joyida qoladi.
-      </p>
+    <div className="mx-auto max-w-7xl px-6 py-16">
+      <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-16">
+        {/* Forma qismi */}
+        <div className="w-full max-w-md shrink-0">
+          <h1 className="script-title text-5xl">{isRegister ? "Register" : "Login"}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Ma'lumotlar shu brauzerda saqlanadi, keyingi kirishda profilingiz joyida qoladi.
+          </p>
 
-      <form onSubmit={submit} className="mt-8 space-y-4">
-        {isRegister && (
-          <label className="block">
-            <span className="text-sm font-bold">Username</span>
-            <input
-              required
-              value={form.username}
-              onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
-              className="mt-1 h-11 w-full rounded-md border border-input px-3 text-sm outline-none focus:border-primary"
-            />
-          </label>
-        )}
-        <label className="block">
-          <span className="text-sm font-bold">Email</span>
-          <input
-            required
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            className="mt-1 h-11 w-full rounded-md border border-input px-3 text-sm outline-none focus:border-primary"
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm font-bold">Password</span>
-          <input
-            required
-            minLength={4}
-            type="password"
-            value={form.password}
-            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-            className="mt-1 h-11 w-full rounded-md border border-input px-3 text-sm outline-none focus:border-primary"
-          />
-        </label>
+          <form onSubmit={submit} className="mt-8 space-y-4">
+            {isRegister && (
+              <label className="block">
+                <span className="text-sm font-bold">Username</span>
+                <input
+                  required
+                  value={form.username}
+                  onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+                  className="mt-1 h-11 w-full rounded-md border border-input px-3 text-sm outline-none focus:border-primary"
+                />
+              </label>
+            )}
+            <label className="block">
+              <span className="text-sm font-bold">Email</span>
+              <input
+                required
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                className="mt-1 h-11 w-full rounded-md border border-input px-3 text-sm outline-none focus:border-primary"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-bold">Password</span>
+              <input
+                required
+                minLength={4}
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                className="mt-1 h-11 w-full rounded-md border border-input px-3 text-sm outline-none focus:border-primary"
+              />
+            </label>
 
-        {error && <p className="text-sm font-semibold text-destructive">{error}</p>}
+            {error && <p className="text-sm font-semibold text-destructive">{error}</p>}
 
-        <button
-          type="submit"
-          className="h-11 w-full rounded-md bg-primary text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
-        >
-          {isRegister ? "Create account" : "Sign in"}
-        </button>
-      </form>
+            <button
+              type="submit"
+              className="h-11 w-full rounded-md bg-primary text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              {isRegister ? "Create account" : "Sign in"}
+            </button>
+          </form>
 
-      <p className="mt-6 text-sm text-muted-foreground">
-        {isRegister ? "Akkauntingiz bormi? " : "Akkauntingiz yo'qmi? "}
-        <Link
-          to="/auth"
-          search={{ mode: isRegister ? "login" : "register" }}
-          className="font-bold text-primary hover:underline"
-        >
-          {isRegister ? "Login" : "Register"}
-        </Link>
-      </p>
+          <p className="mt-6 text-sm text-muted-foreground">
+            {isRegister ? "Akkauntingiz bormi? " : "Akkauntingiz yo'qmi? "}
+            <Link
+              to="/auth"
+              search={{ mode: isRegister ? "login" : "register" }}
+              className="font-bold text-primary hover:underline"
+            >
+              {isRegister ? "Login" : "Register"}
+            </Link>
+          </p>
+        </div>
+
+        {/* O'ng tomon — Featured kartalar */}
+        <div className="flex-1">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="script-title text-3xl">Tavsiya etilgan retseptlar</h2>
+            <Link
+              to="/explore"
+              className="text-xs font-bold text-primary hover:underline"
+            >
+              Barchasini ko'rish &rarr;
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredRecipes.map((r) => (
+              <RecipeCard key={r.id} recipe={r} />
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

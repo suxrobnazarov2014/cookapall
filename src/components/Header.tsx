@@ -11,13 +11,17 @@ import {
   UserPlus,
   BookMarked,
   Lock,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { filterGroups } from "@/lib/recipes";
 import { CartDrawer } from "@/components/CartDrawer";
+import { useTheme } from "@/lib/theme";
 
 export function Header() {
   const { user, cart, logout } = useStore();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All Categories");
@@ -76,33 +80,53 @@ export function Header() {
               Suppliers
             </Link>
           </nav>
-          {user ? (
-            <div className="flex items-center gap-4">
-              <Link to="/profile" className="flex items-center gap-1.5 hover:opacity-80">
-                <UserIcon className="size-3.5" /> {user.username}
-              </Link>
-              <button onClick={logout} className="flex items-center gap-1.5 hover:opacity-80">
-                <LogOut className="size-3.5" /> Logout
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-4">
-              <Link
-                to="/auth"
-                search={{ mode: "register" }}
-                className="flex items-center gap-1.5 hover:opacity-80"
-              >
-                <UserPlus className="size-3.5" /> Register
-              </Link>
-              <Link
-                to="/auth"
-                search={{ mode: "login" }}
-                className="flex items-center gap-1.5 hover:opacity-80"
-              >
-                <LogIn className="size-3.5" /> Login
-              </Link>
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+              title={theme === "dark" ? "Light Mode-ga o'tish" : "Dark Mode-ga o'tish"}
+            >
+              {theme === "dark" ? (
+                <>
+                  <Sun className="size-3.5 text-amber-300" />
+                  <span>Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="size-3.5 text-sky-200" />
+                  <span>Dark Mode</span>
+                </>
+              )}
+            </button>
+
+            {user ? (
+              <div className="flex items-center gap-4">
+                <Link to="/profile" className="flex items-center gap-1.5 hover:opacity-80">
+                  <UserIcon className="size-3.5" /> {user.username}
+                </Link>
+                <button onClick={logout} className="flex items-center gap-1.5 hover:opacity-80">
+                  <LogOut className="size-3.5" /> Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <Link
+                  to="/auth"
+                  search={{ mode: "register" }}
+                  className="flex items-center gap-1.5 hover:opacity-80"
+                >
+                  <UserPlus className="size-3.5" /> Register
+                </Link>
+                <Link
+                  to="/auth"
+                  search={{ mode: "login" }}
+                  className="flex items-center gap-1.5 hover:opacity-80"
+                >
+                  <LogIn className="size-3.5" /> Login
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
