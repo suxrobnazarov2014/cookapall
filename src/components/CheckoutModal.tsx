@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, CreditCard, DollarSign, CheckCircle2, ShoppingBag } from "lucide-react";
 import type { Recipe } from "@/lib/recipes";
+import { useStore } from "@/lib/store";
 
 type CheckoutModalProps = {
   recipe: Recipe | null;
@@ -17,6 +18,7 @@ const CARD_TYPES = [
 ];
 
 export function CheckoutModal({ recipe, isOpen, onClose, onSuccess }: CheckoutModalProps) {
+  const { addOrder, addNotification } = useStore();
   const [quantity, setQuantity] = useState(1);
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
@@ -55,36 +57,52 @@ export function CheckoutModal({ recipe, isOpen, onClose, onSuccess }: CheckoutMo
       }
     }
 
-    // Create order object for Supplier Portal
-    const newOrder = {
-      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-      customerName: "Mijoz",
-      phone: phone.trim(),
-      address: address.trim(),
+    const paymentLabel =
+      paymentMethod === "card" ? `Karta (${cardType.toUpperCase()})` : "Naqd pul";
+
+    // Save order to global store
+    addOrder({
       recipeId: recipe.id,
       recipeTitle: recipe.title,
       recipeImage: recipe.image,
       quantity,
-      unitPrice: recipe.price,
+      price: recipe.price,
       totalPrice,
-      paymentMethod: paymentMethod === "card" ? `Karta (${cardType.toUpperCase()})` : "Naqd pul",
-      cardNumber: paymentMethod === "card" ? cardNumber : undefined,
-      status: "Kutilmoqda ⏳",
-      createdAt: `Bugun, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-    };
+      address: address.trim(),
+      paymentMethod: paymentLabel,
+    });
 
+    // Send notification to user
+    addNotification(
+      `✅ "${recipe.title}" buyurtmangiz qabul qilindi! Tez orada yetkaziladi.`,
+      "success",
+    );
+
+    // Also save to supplier_orders for the courier portal
     try {
+      const supplierOrder = {
+        id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+        customerName: "Mijoz",
+        phone: phone.trim(),
+        address: address.trim(),
+        recipeId: recipe.id,
+        recipeTitle: recipe.title,
+        recipeImage: recipe.image,
+        quantity,
+        unitPrice: recipe.price,
+        totalPrice,
+        paymentMethod: paymentLabel,
+        cardNumber: paymentMethod === "card" ? cardNumber : undefined,
+        status: "Kutilmoqda ⏳",
+        createdAt: `Bugun, ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+      };
       const raw = localStorage.getItem("cookpal.supplier_orders");
       const existing = raw ? JSON.parse(raw) : [];
-      const updated = [newOrder, ...existing];
-      localStorage.setItem("cookpal.supplier_orders", JSON.stringify(updated));
+      localStorage.setItem("cookpal.supplier_orders", JSON.stringify([supplierOrder, ...existing]));
       window.dispatchEvent(new Event("cookpal_order_created"));
     } catch (e) {
       console.error(e);
     }
-
-    // Trigger user-requested exact alert text
-    alert("Buyurtma tez orada qo'lingizda bo'ladi");
 
     onSuccess(recipe.id);
     onClose();
